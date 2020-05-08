@@ -1,6 +1,6 @@
 # Castpack ✨
 
-Castpack is a magical R library that lets you effortlessly import your R linear and generalized linear models into your SQL Server database.
+Castpack is a magical R library that lets you effortlessly import linear models into your SQL Server database.
 
 Leveraging the powerful open-source [modelc](https://github.com/team-sparkfish/modelc) library, Castpack will transpile models consisting of hundreds of parameters to performant ANSI SQL in mere seconds, and load them into your database in the blink of an eye. Just bring your models as `.Rds` files, tell Castpack about your database with a simple configuration file, and let her rip!
 
