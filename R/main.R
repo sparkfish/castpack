@@ -1,6 +1,7 @@
 library(odbc)
 library(whisker)
 source("config.R")
+options(scipen=999)
 
 connect <- function() {
   connection <- dbConnect(
@@ -38,13 +39,14 @@ create_model_table <- function() {
 }
 
 construct_model_select <- function(auxiliary_columns, model_sql,
-                                   response_column, datasource) {
+                                   response_column, datasource, raw) {
   template <- "SELECT
 {{#auxiliary_columns}}
 {{.}},
 {{/auxiliary_columns}}
 {{model_sql}} AS {{response_column}}
-FROM {{datasource}}"
+FROM {{datasource}}
+{{raw}}"
   whisker.render(template)
 }
 
@@ -103,11 +105,6 @@ perform_sproc_exists_check_and_drop <- function(schema) {
 }
 
 perform_model_update <- function() {
-  ddl <- construct_ddl_statement(config$database_schema)
-  execute(ddl)
-}
-
-construct_model_update <- function() {
   connection <- connect()
   model_sql <- list()
   i <- 1
@@ -120,9 +117,11 @@ construct_model_update <- function() {
       model$auxiliary_columns,
       model_string,
       model$response_column,
-      model$datasource
+      model$datasource,
+      model$raw
     )
     dbBind(prepared_upsert, c(model$name, model$name, model_select, model_select, model$name))
+    #dbClearResult(prepared_upsert)
   }
   dbClearResult(prepared_upsert)
   dbDisconnect(connection)
@@ -141,7 +140,7 @@ EXEC {{schema}}.Predict
 create_predict_procedure <- function() {
   perform_sproc_exists_check_and_drop(config$database_schema)
   create_procedure <- construct_create_procedure(config$database_schema)
-  create_procuedre <- sub(create_procedure, "\n", " ")
+  #create_procedure <- sub(create_procedure, "\n", " ")
   execute(create_procedure)
 }
 
@@ -178,3 +177,4 @@ main <- function(install = T, update_models = T, validate = F) {
     test_predict()
   }
 }
+
