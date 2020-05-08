@@ -8,7 +8,7 @@ Unlike other libraries and tools, Castpack was purpose-built for predictive line
 
 It was inspired by and builds upon the venerable [tidypredict](https://tidymodels.github.io/tidypredict/) library.
 
-# Installation
+## Installation
 
 Using `devtools`:
 
@@ -41,7 +41,7 @@ castpack::install()
 
 This will create the necessary objects for models to be loaded and run inside your database.
 
-# How it works
+## How it works
 
 Castpack is simple to use because it is opinionated (in a "convention over configuration" sense) about how models are represented in your database.
 
@@ -53,7 +53,7 @@ The models specified in `config.R` are then transpiled from `.Rds` format files 
 
 Because the models are nothing more than formulas represented as select statements, they are blazing fast.
 
-# API
+## API
 
 - `castpack::install()` creates the `${schema}.Models` table and `${schema}.Predict` procedure
 - `castpack::main()` upserts the models specified in `config.R` to the `Models` table. This function depends on a `models` variable defined in `config.R` that tells Castpack about the models you'd like to load into your database. See `example.config.R` for an example configuration. 
