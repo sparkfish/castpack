@@ -1,3 +1,5 @@
+<div style="text-align:center"><img src="https://user-images.githubusercontent.com/1108065/81478721-b1d02280-91e4-11ea-9e8c-99592b69f054.png" /></div>
+
 # Castpack ✨
 
 Castpack is a magical R library that lets you effortlessly package linear forecast models and deploys them for use directly in your Microsoft SQL Server database.
