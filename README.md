@@ -1,7 +1,5 @@
 <p align="center"><img width="100" src="https://user-images.githubusercontent.com/1108065/81478721-b1d02280-91e4-11ea-9e8c-99592b69f054.png" alt="Castpack logo"></p>
 
-# Packager for Forecast Models
-
 Castpack is a magical R library that lets you effortlessly package linear forecast models and deploys them for use directly in your Microsoft SQL Server database.
 
 Leveraging the powerful open-source [modelc](https://github.com/team-sparkfish/modelc) library, Castpack will transpile models consisting of hundreds of parameters to performant ANSI SQL in mere seconds, and load them into your database in the blink of an eye. Just bring your models as `.rds` files, tell Castpack about your database with a simple configuration file, and let her rip!
