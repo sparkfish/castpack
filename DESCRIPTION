@@ -2,8 +2,8 @@ Package: Castpack
 Title: Run Linear Models in your SQL Database
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Spark",
-           family = "Fish",
+    person(given = "Sparkfish",
+           family = "Analytics",
            role = c("aut", "cre"),
            email = "hello@sparkfish.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
