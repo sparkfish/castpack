@@ -36,7 +36,7 @@ models <- list()
 Set your working directory to your `config.r` path, and do
 
 ```{R}
-castpack::install()
+Castpack::prepare_registry()
 ```
 
 This will create the necessary objects for models to be loaded and run inside your database.
@@ -45,7 +45,7 @@ This will create the necessary objects for models to be loaded and run inside yo
 
 Castpack is simple to use because it is opinionated (in a "convention over configuration" sense) about how models are represented in your database.
 
-When you run `castpack::install()`, Castpack creates two objects: a `${schema}.Models` table (where `${schema}` is the schema you specified in your configuration file), along with `${schema}.Predict`, a stored procedure for running predictions inside the database.
+When you run `Castpack::prepare_registry()`, Castpack creates two objects: a `${schema}.Models` table (where `${schema}` is the schema you specified in your configuration file), along with `${schema}.Predict`, a stored procedure for running predictions inside the database.
 
 The `Predict` procedure takes as arguments a model name and a datasource name. The latter must correspond to an existing view or table.
 
@@ -55,5 +55,5 @@ Because the models are nothing more than formulas represented as select statemen
 
 ## API
 
-- `castpack::install()` creates the `${schema}.Models` table and `${schema}.Predict` procedure
-- `castpack::main()` upserts the models specified in `config.r` to the `Models` table. This function depends on a `models` variable defined in `config.r` that tells Castpack about the models you'd like to load into your database. See `example.config.r` for an example configuration. 
+- `Castpack::prepare_registry()` creates the `${schema}.Models` table and `${schema}.Predict` procedure
+- `Castpack::deploy_models()` upserts the models specified in `config.r` to the `Models` table. This function depends on a `models` variable defined in `config.r` that tells Castpack about the models you'd like to load into your database. See `example.config.r` for an example configuration. 

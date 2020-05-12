@@ -1,6 +1,9 @@
+library(crayon)
 library(odbc)
 library(whisker)
+
 source("config.R")
+
 options(scipen=999)
 
 connect <- function() {
@@ -30,7 +33,7 @@ CREATE TABLE [{{schema}}].[Models](
 	[dtCreated] [datetime] DEFAULT CURRENT_TIMESTAMP
 )
   "
-  whisker.render(template, list(schema = schema))
+whisker.render(template, list(schema = schema))
 }
 
 create_model_table <- function() {
@@ -111,6 +114,7 @@ perform_model_update <- function() {
   upsert_sql <- construct_upsert_statement(config$database_schema)
   prepared_upsert <- dbSendStatement(connection, upsert_sql)
   for(model in models) {
+    cat(paste("    *   Importing ", model$name, " forecast model to SQL Server...\n", sep=""))
     model_object <- readRDS(model$path)
     model_string <- modelc::modelc(model_object)
     model_select <- construct_model_select(
@@ -121,6 +125,7 @@ perform_model_update <- function() {
       model$raw
     )
     dbBind(prepared_upsert, c(model$name, model$name, model_select, model_select, model$name))
+    cat(paste(green("    ✔"), "   ", model$name, " forecast model deployed!\n", sep=""))
     #dbClearResult(prepared_upsert)
   }
   dbClearResult(prepared_upsert)
@@ -157,19 +162,34 @@ test_predict <- function() {
   dbDisconnect(connection)
 }
 
-main <- function(install = T, update_models = T, validate = F) {
-  # Install the model registry table and create the stored procedures
-  if (install) {
-    create_model_table()
-    create_predict_procedure()
-  }
+print_header  <- function() {
+  # TODO: Inject version from the environment 
+  cat(paste(yellow("✨"), "Castpack v0.5, 2020.10.09\n"))
+  cat("----------------------------\n")
+}
 
+prepare_registry <- function() {
+  # Create the necessary objects to deploy models and query predictions
+  print_header()
+  cat("- Preparing model registry for Castpack\n")
+  cat(paste("    ", "*",  " Creating SQL Server model registry table\n", sep=""))
+  create_model_table()
+  cat(paste("    ", green("✔"), " Model registry table created!\n", sep=""))
+  cat(paste("    ", "*",  " Creating SQL Server Predict procedure\n", sep=""))
+  create_predict_procedure()
+  cat(paste("    ", green("✔"), " Predict procedure created!\n", sep=""))
+  cat(paste(yellow("👍"), " Success! Model registry and Predict procedure initialized.\n"))
+  cat("You are now ready to begin using Castpack to import models into your database\n")
+  cat("To import an R forecast model, save it to the current working directory as an .Rds file and configure it in config.R\n")
+}
+
+deploy_models <- function(validate = F) {
   # Perform the model upsert
-  if (update_models) {
-    perform_model_update()
-  }
-
-  # Validate the model queries
+  print_header()
+  discover_models()
+  perform_model_update()
+  cat(paste(yellow("👍"), "   Success! All forecast models were successfully deployed to SQL Server.\n"))
+   # Validate the model queries
   # TODO: This merely prints the number of rows returned by the query,
   # so it needs to be replaced by a better heuristic for validating
   # the models
@@ -178,3 +198,13 @@ main <- function(install = T, update_models = T, validate = F) {
   }
 }
 
+discover_models <- function(){
+  # Discover models present for manifest output
+  found_models <- c()
+  for (model in models) {
+    found_models <- c(found_models, model$name)
+  }
+  found_models_string <- paste(found_models, collapse=", ")
+  found_ <- paste("-   Found the following forecast models:", found_models_string, "\n")
+  cat(found_)
+}
