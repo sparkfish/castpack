@@ -13,4 +13,7 @@ Encoding: UTF-8
 LazyData: true
 Imports:
   odbc,
-  whisker
+  whisker,
+  crayon
+Remotes:
+  team-sparkfish/modelc@7ab72c52e34964c5819bc871d417a69a34e71836
