@@ -158,13 +158,17 @@ test_predict <- function() {
 }
 
 print_header  <- function() {
-  # TODO: Inject version from the environment 
+  # TODO: Inject version from the environment
   cat(paste(crayon::yellow("✨"), "Castpack v0.5, 2020.10.09\n"))
   cat("----------------------------\n")
 }
 
 read_config <- function(path="config.R") {
+    # Hack to inject configuration into global environment
+    # TODO: Make configuration local to the methods that require it
     source(path)
+    assign("config", config$config, ".GlobalEnv")
+    assign("models", config$models, ".GlobalEnv")
 }
 
 prepare_registry <- function() {
@@ -183,7 +187,7 @@ prepare_registry <- function() {
 }
 
 deploy_models <- function(validate = F) {
-   # Perform the model upsert 
+   # Perform the model upsert
   read_config()
   print_header()
   discover_models()
