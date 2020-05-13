@@ -14,6 +14,9 @@ LazyData: true
 Imports:
   odbc,
   whisker,
-  crayon
+  crayon,
+  modelc,
+  yaml
 Remotes:
-  team-sparkfish/modelc@7ab72c52e34964c5819bc871d417a69a34e71836
+  team-sparkfish/modelc,
+  viking/r-yaml
