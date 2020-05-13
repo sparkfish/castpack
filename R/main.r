@@ -1,14 +1,9 @@
-library(crayon)
-library(odbc)
-library(whisker)
-
-source("config.R")
-
+#source("config.R")
 options(scipen=999)
 
 connect <- function() {
-  connection <- dbConnect(
-    odbc(),
+  connection <- odbc::dbConnect(
+    odbc::odbc(),
     Driver = config$database_driver,
     Server = config$database_host,
     Database = config$database,
@@ -19,9 +14,9 @@ connect <- function() {
 }
 
 execute <- function(statement) {
-  connection <- connect()
-  dbSendStatement(connection, statement, immediate=T)
-  dbDisconnect(connection)
+  connection <- odbc::connect()
+  odbc::dbSendStatement(connection, statement, immediate=T)
+  odbc::dbDisconnect(connection)
 }
 
 construct_ddl_statement <- function(schema) {
@@ -33,7 +28,7 @@ CREATE TABLE [{{schema}}].[Models](
 	[dtCreated] [datetime] DEFAULT CURRENT_TIMESTAMP
 )
   "
-whisker.render(template, list(schema = schema))
+ whisker::whisker.render(template, list(schema = schema))
 }
 
 create_model_table <- function() {
@@ -50,7 +45,7 @@ construct_model_select <- function(auxiliary_columns, model_sql,
 {{model_sql}} AS {{response_column}}
 FROM {{datasource}}
 {{raw}}"
-  whisker.render(template)
+  whisker::whisker.render(template)
 }
 
 construct_upsert_statement <- function(schema) {
@@ -62,7 +57,7 @@ construct_upsert_statement <- function(schema) {
        UPDATE {{schema}}.Models
        SET modelSqlTemplate = ?
        WHERE modelName = ?"
-  whisker.render(template, list(schema = schema))
+  whisker::whisker.render(template, list(schema = schema))
 }
 
 construct_create_procedure <- function(schema) {
@@ -89,7 +84,7 @@ PRINT @dynSqlToExec
 EXEC( @dynSqlToExec )
 
 "
-  whisker.render(template, list(schema = schema))
+  whisker::whisker.render(template, list(schema = schema))
 }
 
 perform_sproc_exists_check_and_drop <- function(schema) {
@@ -103,7 +98,7 @@ perform_sproc_exists_check_and_drop <- function(schema) {
 
     DROP PROCEDURE [{{schema}}].[Predict]
   "
-  sql <- whisker.render(template, list(schema = schema))
+  sql <- whisker::whisker.render(template, list(schema = schema))
   execute(sql)
 }
 
@@ -112,7 +107,7 @@ perform_model_update <- function() {
   model_sql <- list()
   i <- 1
   upsert_sql <- construct_upsert_statement(config$database_schema)
-  prepared_upsert <- dbSendStatement(connection, upsert_sql)
+  prepared_upsert <- odbc::dbSendStatement(connection, upsert_sql)
   for(model in models) {
     cat(paste("    *   Importing ", model$name, " forecast model to SQL Server...\n", sep=""))
     model_object <- readRDS(model$path)
@@ -124,12 +119,12 @@ perform_model_update <- function() {
       model$datasource,
       model$raw
     )
-    dbBind(prepared_upsert, c(model$name, model$name, model_select, model_select, model$name))
-    cat(paste(green("    ✔"), "   ", model$name, " forecast model deployed!\n", sep=""))
+    odbc::dbBind(prepared_upsert, c(model$name, model$name, model_select, model_select, model$name))
+    cat(paste(crayon::green("    ✔"), "   ", model$name, " forecast model deployed!\n", sep=""))
     #dbClearResult(prepared_upsert)
   }
-  dbClearResult(prepared_upsert)
-  dbDisconnect(connection)
+  odbc::dbClearResult(prepared_upsert)
+  odbc::dbDisconnect(connection)
 }
 
 construct_test_select <- function(schema) {
@@ -139,7 +134,7 @@ EXEC {{schema}}.Predict
   , @dataSourceViewName = ?
 ;
   "
-  whisker.render(template, list(schema = schema))
+  whisker::whisker.render(template, list(schema = schema))
 }
 
 create_predict_procedure <- function() {
@@ -152,20 +147,24 @@ create_predict_procedure <- function() {
 test_predict <- function() {
   connection <- connect()
   query <- construct_test_select(config$database_schema)
-  prepared_query <- dbSendQuery(connection, query)
+  prepared_query <- odbc::dbSendQuery(connection, query)
   for (model in models) {
-    dbBind(prepared_query, c(model$name, model$datasource))
-    fetched = dbGetRowsAffected(prepared_query, n = 1)
+    odbc::dbBind(prepared_query, c(model$name, model$datasource))
+    fetched = odbc::dbGetRowsAffected(prepared_query, n = 1)
     cat(paste(model$name, "returns", fetched, "rows"))
   }
-  dbClearResult(prepared_query)
-  dbDisconnect(connection)
+  odbc::dbClearResult(prepared_query)
+  odbc::dbDisconnect(connection)
 }
 
 print_header  <- function() {
   # TODO: Inject version from the environment 
-  cat(paste(yellow("✨"), "Castpack v0.5, 2020.10.09\n"))
+  cat(paste(crayon::yellow("✨"), "Castpack v0.5, 2020.10.09\n"))
   cat("----------------------------\n")
+}
+
+read_config <- function(path="config.R") {
+    source(path)
 }
 
 prepare_registry <- function() {
@@ -174,21 +173,22 @@ prepare_registry <- function() {
   cat("- Preparing model registry for Castpack\n")
   cat(paste("    ", "*",  " Creating SQL Server model registry table\n", sep=""))
   create_model_table()
-  cat(paste("    ", green("✔"), " Model registry table created!\n", sep=""))
+  cat(paste("    ", crayon::green("✔"), " Model registry table created!\n", sep=""))
   cat(paste("    ", "*",  " Creating SQL Server Predict procedure\n", sep=""))
   create_predict_procedure()
-  cat(paste("    ", green("✔"), " Predict procedure created!\n", sep=""))
-  cat(paste(yellow("👍"), " Success! Model registry and Predict procedure initialized.\n"))
+  cat(paste("    ", crayon::green("✔"), " Predict procedure created!\n", sep=""))
+  cat(paste(crayon::yellow("👍"), " Success! Model registry and Predict procedure initialized.\n"))
   cat("You are now ready to begin using Castpack to import models into your database\n")
   cat("To import an R forecast model, save it to the current working directory as an .Rds file and configure it in config.R\n")
 }
 
 deploy_models <- function(validate = F) {
-  # Perform the model upsert
+   # Perform the model upsert 
+  read_config()
   print_header()
   discover_models()
   perform_model_update()
-  cat(paste(yellow("👍"), "   Success! All forecast models were successfully deployed to SQL Server.\n"))
+  cat(paste(crayon::yellow("👍"), "   Success! All forecast models were successfully deployed to SQL Server.\n"))
    # Validate the model queries
   # TODO: This merely prints the number of rows returned by the query,
   # so it needs to be replaced by a better heuristic for validating
