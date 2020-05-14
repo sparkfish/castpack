@@ -15,25 +15,18 @@ Using `devtools`:
 ```{R}
 install.packages("devtools")
 install.packages("remotes")
-remotes::install_github("team-sparkfish/Castpack")
+remotes::install_github("team-sparkfish/Castpack", dependencies=T)
 ```
-Prepare a `config.r` file:
 
-```{R}
-config <- list(
-  database = "my_database_name",
-  database_schema = "my_schema",
-  database_user = "my_user",
-  database_password = "my_password",
-  database_host = "123.456.10.10",
-  database_port = 1433,
-  # This must be an ODBC SQL Server driver
-  database_driver = "ODBC Driver 17 for SQL Server"
-)
+Prepare a workspace directory:
 
-models <- list()
+```{shell}
+$ mkdir workspace
 ```
-Set your working directory to your `config.r` path, and do
+
+Copy the `example.models.yml` and `example.db.yml` configuration files to `workspace/models.yml` and `workspace/db.yml` respectively and fill in the details for your database and model.
+
+Set your R working directory to your workspace, and run
 
 ```{R}
 Castpack::prepare_registry()
@@ -49,11 +42,37 @@ When you run `Castpack::prepare_registry()`, Castpack creates two objects: a `${
 
 The `Predict` procedure takes as arguments a model name and a datasource name. The latter must correspond to an existing view or table.
 
-The models specified in `config.r` are then transpiled from `.rds` format files into ANSI SQL queries, which are upserted into the `Models` table. From there, you can run the `Predict` procedure against the model and a table or view in your database.
+The models specified in `models.yml` are then transpiled from `.rds` format files into ANSI SQL queries, which are upserted into the `Models` table. From there, you can run the `Predict` procedure against the model and a table or view in your database.
 
 Because the models are nothing more than formulas represented as select statements, they are blazing fast.
+
+## Making Predictions
+
+To make predictions, used the `Predict` function that is created when `Castpack::prepare_registry()` is run.
+
+It takes two arguments:
+
+``` sql
+@modelName NVARCHAR(128),
+@dataSourceViewName NVARCHAR(258)
+```
+
+`@dataSourceViewName` should be the name of an existing table or view.
+
+## Model Configuration
+
+Use `models.yml` to configure your models. There should be a toplevel key for each model to be imported consisting of the following attributes
+
+- `name` The model name is used by the `Predict` procedure to apply the model against the specified dataset
+- `path` The path to the model file. The model should live on disk as a `.Rds` formatted file
+- `datasource` The data source should be an existing table or view the model should be applied against
+- `auxiliary_columns` These are additional columns to be returned in the output of `Predict` 
+- `response_column` This specifies the alias of the response column in the output of `Predict`
+- `raw` _(optional)_ Any additional SQL (e.g., a `WHERE` or `ORDER BY` clause) can be added here
+
+See `example.models.yml` for an example.
 
 ## API
 
 - `Castpack::prepare_registry()` creates the `${schema}.Models` table and `${schema}.Predict` procedure
-- `Castpack::deploy_models()` upserts the models specified in `config.r` to the `Models` table. This function depends on a `models` variable defined in `config.r` that tells Castpack about the models you'd like to load into your database. See `example.config.r` for an example configuration. 
+- `Castpack::deploy_models()` upserts the models specified in `config.r` to the `Models` table. This function depends on a `models` variable defined in `config.r` that tells Castpack about the models you'd like to load into your database. See `example.config.r` for an example configuration.

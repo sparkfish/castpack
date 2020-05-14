@@ -1,0 +1,15 @@
+sepal_width:
+  name: "sepal_width"
+  path: "sepal_width.Rds"
+  auxiliary_columns: ["SEPAL_LENGTH", "PETAL_LENGTH", "SPECIES"]
+  response_column: "SEPAL_WIDTH"
+  raw: "ORDER BY SPECIES DESC, PETAL_LENGTH ASC"
+  datasource: "irises"
+
+sepal_length:
+  name: "sepal_length"
+  path: "sepal_length.Rds"
+  auxiliary_columns: ["SEPAL_WIDTH", "SPECIES"]
+  response_column: "SEPAL_LENGTH"
+  raw: ""
+  datasource: "irises"

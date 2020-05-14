@@ -1,0 +1,7 @@
+Database: "myDatabase"
+Schema: "mySchema"
+User: "myUser"
+Password: "notpassword123"
+Server: "db.example.com"
+Port: 1433
+Driver: "ODBC Driver 17 for SQL Server"
