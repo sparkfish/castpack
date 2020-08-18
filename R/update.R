@@ -16,7 +16,7 @@ perform_model_update <- function(db, models) {
     )
     record <- c(model$name, model$name, model_select, model_select, model$name)
     db$bind(prepared_upsert, record)
-    cat(paste(crayon::green("    ✔"), "   ", model$name, " forecast model deployed!\n", sep=""))
+    cat(paste(crayon::green("    \u2714"), "   ", model$name, " forecast model deployed!\n", sep=""))
   }
   db$cleanup(prepared_upsert)
 }

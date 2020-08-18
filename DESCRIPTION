@@ -1,14 +1,11 @@
 Package: Castpack
-Title: Run Linear Models in your SQL Database
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "Sparkfish",
-           family = "Analytics",
-           role = c("aut", "cre"),
-           email = "hello@sparkfish.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: What license it uses
+Title: Run Linear Models in your 'SQL' Database
+Version: 1.0.0.0
+Authors@R:
+    person("Sparkfish Analytics", role=c("cph"))
+    person(given = "Hugo", family = "Saavedra", email = "analytics+hugo@sparkfish.com", role = c("aut", "cre"))
+Description: This is library performantly translates linear models into 'SQL' and deploys them for use directly in your database. It leverages the powerful open-source 'modelc' library to transpile linear models consisting of hundreds of parameters to performant 'SQL' in seconds. Unlike other libraries and tools, 'Castpack' was purpose-built for predictive linear and generalized linear models as were first described in Nelder & Wedder (1972) <doi:10.2307/2344614>. This focus on linear models keeps 'Castpack' lightweight, while enabling it to support models that other libraries struggle with.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
@@ -16,7 +13,9 @@ Imports:
   whisker,
   crayon,
   modelc,
-  yaml
+  yaml,
+  methods
 Remotes:
   team-sparkfish/modelc,
   viking/r-yaml
+RoxygenNote: 7.1.0

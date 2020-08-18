@@ -1,0 +1,8 @@
+^Castpack\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^LICENSE.md$
+^SECURITY\.md$
+^(.)*\.yml$
+^(.)*\.png$
+^(.)*\.Rds$

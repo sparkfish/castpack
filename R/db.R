@@ -1,3 +1,13 @@
+#' A reference class to represent database connections.
+#' @name Database
+#' @importFrom methods new
+#' @field Driver A character vector such as "ODBC Driver 17 for SQL Server" describing the database driver to use
+#' @field Server A character vector representing the hostname of the database
+#' @field Schema A character vector representing the schema to create the models table
+#' @field Database A character vector representing the SQL Server database name
+#' @field UID A character vector such as "myuser" representing the database user to use with SQL Server authentication
+#' @field PWD A character vector representing the password of the user to use with SQL Server authentication
+#' @field Port An integer representing the database port
 Database <- setRefClass("Database",
   fields = c("Driver", "Server", "Schema", "Database", "UID", "PWD", "Port", "Connection"),
   methods = list(
@@ -21,10 +31,10 @@ Database <- setRefClass("Database",
     },
     construct_ddl_statement = function() {
       template = "IF NOT EXISTS (
-   SELECT * FROM sys.tables 
-   AS tb INNER JOIN sys.schemas schemas 
-   ON tb.schema_id = schemas.schema_id 
-   WHERE schemas.name = '{{schema}}' 
+   SELECT * FROM sys.tables
+   AS tb INNER JOIN sys.schemas schemas
+   ON tb.schema_id = schemas.schema_id
+   WHERE schemas.name = '{{schema}}'
    AND tb.name = 'Models')
 CREATE TABLE [{{schema}}].[Models](
   [modelName] [nvarchar](128) NOT NULL,
@@ -85,7 +95,6 @@ EXEC( @dynSqlToExec )
 "
       whisker::whisker.render(template, list(schema = Schema))
     },
-    
     perform_sproc_exists_check_and_drop = function() {
       template <- "
   IF EXISTS (
@@ -110,8 +119,8 @@ EXEC( @dynSqlToExec )
     },
     cleanup = function(prepared_statement_object=NA) {
       if (!is.na(prepared_statement_object)) {
-        odbc::dbClearResult(prepared_statement_object) 
-      } 
+        odbc::dbClearResult(prepared_statement_object)
+      }
       disconnect()
     },
     bind = function(prepared_statement, datum) {
