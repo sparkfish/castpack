@@ -38,6 +38,7 @@ prepare_registry <- function(db_config_path="db.yml") {
   db$cleanup()
   cat("You are now ready to begin using Castpack to import models into your database\n")
   cat("To import an R forecast model, save it to the current working directory as an .Rds file and configure it in config.R\n")
+  cat("Then, call Castpack::deploy_models() to start the import\n")
 }
 
 #' @title Deploy models to SQL Server
